@@ -270,6 +270,7 @@ void OneButton::_fsm(bool activeLevel) {
       } else if (waitTime > _press_ms) {
         if (_longPressStartFunc) _longPressStartFunc();
         if (_paramLongPressStartFunc) _paramLongPressStartFunc(_longPressStartFuncParam);
+        _startTime = now;  // remember starting time
         _newState(OneButton::OCS_PRESS);
       }  // if
       break;
@@ -290,7 +291,8 @@ void OneButton::_fsm(bool activeLevel) {
         _newState(OneButton::OCS_DOWN);
         _startTime = now;  // remember starting time
 
-      } else if ((waitTime >= _click_ms) || (_nClicks == _maxClicks)) {
+      } else if ((now - _startTime) >= 200 || (_nClicks == _maxClicks)) {
+        Serial.println(now - _startTime);
         // now we know how many clicks have been made.
 
         if (_nClicks == 1) {
@@ -331,10 +333,15 @@ void OneButton::_fsm(bool activeLevel) {
 
     case OneButton::OCS_PRESSEND:
       // button was released.
-
       if (_longPressStopFunc) _longPressStopFunc();
       if (_paramLongPressStopFunc) _paramLongPressStopFunc(_longPressStopFuncParam);
-      reset();
+      Serial.println(now - _startTime);
+      Serial.println(_click_ms - _press_ms);
+      if ((now - _startTime) < (_click_ms - _press_ms)){
+        _newState(OneButton::OCS_UP);
+      }else{
+        reset();
+      }
       break;
 
     default:
