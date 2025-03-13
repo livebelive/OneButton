@@ -290,7 +290,7 @@ void OneButton::_fsm(bool activeLevel) {
         _newState(OneButton::OCS_DOWN);
         _startTime = now;  // remember starting time
 
-      } else if ((waitTime >= _click_ms) || (_nClicks == _maxClicks)) {
+      } else if ((now - _startTime) >= 200 || (_nClicks == _maxClicks)) {
         // now we know how many clicks have been made.
 
         if (_nClicks == 1) {
